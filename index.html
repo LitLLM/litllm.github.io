@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="LitLLMs, LLMs for Literature Review: Are We There Yet?">
+  <meta name="keywords" content="Literature Review, LLMs, Research">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LitLLMs: LLMs for Literature Review</title>
+
+  <!-- Open Graph meta tags for better sharing/preview -->
+  <meta property="og:title" content="LitLLMs: LLMs for Literature Review">
+  <meta property="og:description"
+    content="LitLLM is a powerful AI toolkit that transforms how researchers write literature reviews using advanced RAG to create accurate, well-structured related work sections.">
+  <meta property="og:image" content="./static/images/litllm_logo.jpg">
+  <meta property="og:url" content="https://litllm.github.io/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="./static/images/litllm_logo.jpg">
+
+  <!-- Dark mode fix script - must be first -->
+  <script src="./static/js/dark-mode-fix.js"></script>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/dark-mode.css">
+  <link rel="stylesheet" href="./static/css/theme-reset.css">
+  <link rel="icon" href="./static/images/litllm_logo.jpg">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/fira_code.css">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/4.16.0/gradio.js"></script>
+  <script src="./static/js/theme-toggle.js"></script>
+
+  <style>
+    body {
+      background-color: #f9f9f9;
+      background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
+      color: #333;
+      font-family: 'Google Sans', 'Noto Sans', sans-serif;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(50, 115, 220, 0.05), rgba(72, 95, 199, 0.05));
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Add subtle accent bubbles in the background */
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      z-index: 0;
+      opacity: 0.1;
+      filter: blur(40px);
+    }
+
+    .hero::before {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(#3273dc, transparent 70%);
+      top: -100px;
+      right: -100px;
+    }
+
+    .hero::after {
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(#485fc7, transparent 70%);
+      bottom: -100px;
+      left: -50px;
+    }
+
+    .section {
+      padding: 2rem 1.5rem;
+      background-color: white;
+      margin: 1.5rem auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Make titles more appealing */
+    .title.is-3 {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      position: relative;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Enhanced title underline effect */
+    .title.is-3:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, #3273dc, #485fc7);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .title.is-3:hover:after {
+      width: 120px;
+    }
+
+    /* Enhance paragraph readability */
+    p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    /* Enhance figures */
+    figure {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    figure:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    figure img {
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    figure:hover img {
+      transform: scale(1.01);
+    }
+
+    figcaption {
+      padding: 1.2rem 0.7rem;
+      font-size: 0.95rem;
+      color: #666;
+      border-top: 1px solid #eee;
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Improve buttons */
+    .external-link.button {
+      transition: all 0.3s ease;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .external-link.button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Better styling for strong elements */
+    strong,
+    b {
+      font-weight: 700;
+      color: #3273dc;
+      text-decoration: none;
+      position: relative;
+      padding: 0 2px;
+      transition: all 0.2s ease;
+    }
+
+    strong:hover,
+    b:hover {
+      color: #485fc7;
+    }
+
+    /* Enhanced TL;DR box with subtle animation */
+    .tldr-box {
+      background-color: #f9f9f9;
+      border-left: 5px solid #3273dc;
+      padding: 20px 25px;
+      margin: 25px 0;
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .tldr-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      border-left-width: 7px;
+    }
+
+    .tldr-title {
+      font-weight: bold;
+      color: #3273dc;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    /* Dark mode fixes and enhancements */
+    .dark-mode strong,
+    .dark-mode b {
+      color: #78b9ff !important;
+      /* Lighter, more vibrant blue */
+      font-weight: 600;
+      background-color: rgba(50, 115, 220, 0.15);
+      /* Subtle highlight background */
+      padding: 0 4px;
+      border-radius: 3px;
+      display: inline-block;
+      /* Ensure proper display */
+      position: relative;
+      /* For z-index positioning */
+      z-index: 2;
+      /* Ensure text appears above backgrounds */
+      text-shadow: 0 0 1px rgba(120, 185, 255, 0.3);
+    }
+
+    /* Special styling for bold text in specific contexts */
+    .dark-mode td strong,
+    .dark-mode th strong,
+    .dark-mode li strong,
+    .dark-mode h1 strong,
+    .dark-mode h2 strong,
+    .dark-mode h3 strong,
+    .dark-mode h4 strong,
+    .dark-mode h5 strong,
+    .dark-mode h6 strong,
+    .dark-mode .tldr-box strong {
+      color: #78b9ff !important;
+      background-color: rgba(50, 115, 220, 0.15);
+      padding: 0 4px;
+      border-radius: 3px;
+      display: inline-block;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 0 1px rgba(120, 185, 255, 0.3);
+    }
+
+    /* Enhanced aesthetic for dark mode sections */
+    .dark-mode .section {
+      background-color: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-mode .section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Additional aesthetic improvements for dark mode */
+    .dark-mode .hero::before {
+      background: radial-gradient(#4e8cff, transparent 70%);
+      opacity: 0.15;
+    }
+
+    .dark-mode .hero::after {
+      background: radial-gradient(#7a97ff, transparent 70%);
+      opacity: 0.15;
+    }
+
+    .dark-mode figure {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-mode figure:hover {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .expandable-card .card-text-container {
+      max-height: 200px;
+      overflow-y: hidden;
+      position: relative;
+    }
+
+    .expandable-card.expanded .card-text-container {
+      max-height: none;
+    }
+
+    .expand-btn {
+      position: relative;
+      display: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #510c75;
+      border-color: transparent;
+    }
+
+    .expand-btn:hover {
+      background-color: rgba(200, 200, 200, 0.8);
+      text-decoration: none;
+      border-color: transparent;
+      color: #510c75;
+    }
+
+    .expand-btn:focus {
+      outline: none;
+      text-decoration: none;
+    }
+
+    .expandable-card:not(.expanded) .card-text-container:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
+    }
+
+    .expandable-card:not(.expanded) .expand-btn {
+      margin-top: -40px;
+    }
+
+    .card-body {
+      padding-bottom: 5px;
+    }
+
+    .vertical-flex-layout {
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .figure-img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .adjustable-font-size {
+      font-size: calc(0.5rem + 2vw);
+    }
+
+    .chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    #gradio pre {
+      background-color: transparent;
+    }
+
+    .container.is-max-desktop {
+      padding: 0 1.5rem;
+    }
+
+    .publication-title {
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #3273dc, #485fc7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+    }
+
+    .author-block a {
+      color: #4a4a4a;
+      text-decoration: none;
+      transition: color 0.3s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .author-block a:hover {
+      color: #3273dc;
+      transform: translateY(-2px);
+    }
+
+    .subtitle-style {
+      font-style: italic;
+      color: #555;
+      transition: color 0.3s ease;
+    }
+
+    .subtitle-style:hover {
+      color: #3273dc;
+    }
+
+    .equal-contrib {
+      font-size: 0.9em;
+      margin-top: 8px;
+      color: #666;
+    }
+
+    .citation-box {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      position: relative;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .citation-box pre {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      font-family: 'Fira Code', monospace;
+      font-size: inherit;
+      line-height: inherit;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      color: inherit;
+    }
+
+    .citation-box:hover {
+      background-color: #eaeaea;
+      transform: translateY(-3px);
+    }
+
+    .citation-heading {
+      margin: 2rem 0 1rem;
+      font-weight: 600;
+      color: #444;
+      text-align: center;
+    }
+
+    .citation-boxes-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(50, 115, 220, 0.1);
+      border: none;
+      border-radius: 4px;
+      padding: 5px 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: #3273dc;
+    }
+
+    .copy-button:hover {
+      background: rgba(50, 115, 220, 0.2);
+    }
+
+    .copy-button.copied {
+      background: rgba(72, 199, 116, 0.2);
+      color: #48c774;
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.9em;
+      color: #777;
+      text-align: center;
+    }
+
+    /* Dark mode styles for citation boxes */
+    .dark-mode .citation-box {
+      background-color: #2a2a2a;
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .citation-box:hover {
+      background-color: #333333;
+    }
+
+    .dark-mode .citation-heading {
+      color: #d0d0d0;
+    }
+
+    .dark-mode .copy-button {
+      background: rgba(78, 140, 255, 0.15);
+      color: #78b9ff;
+    }
+
+    .dark-mode .copy-button:hover {
+      background: rgba(78, 140, 255, 0.25);
+    }
+
+    .dark-mode .copy-button.copied {
+      background: rgba(72, 199, 116, 0.15);
+      color: #7cd9a2;
+    }
+
+    .dark-mode .footer-note {
+      color: #aaa;
+    }
+
+    .coming-soon {
+      background-color: #FFEDB9;
+      color: #856404;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .coming-soon:hover {
+      transform: scale(1.02);
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .publication-links {
+      margin-top: 1.5rem;
+    }
+
+    .feature-item {
+      background-color: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #3273dc;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-item:nth-child(even) {
+      border-left: 4px solid #485fc7;
+    }
+
+    .feature-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: rgba(50, 115, 220, 0.2);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-item:nth-child(even) .feature-number {
+      color: rgba(72, 95, 199, 0.2);
+    }
+
+    .abstract-text {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #444;
+      padding: 1.5rem;
+      background-color: rgba(50, 115, 220, 0.03);
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .tmlr-badge {
+      display: inline-block;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, rgba(50, 115, 220, 0.1), rgba(72, 95, 199, 0.1));
+      border-left: 4px solid #3273dc;
+      border-right: 4px solid #485fc7;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tmlr-badge:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Dark mode enhancements */
+    .dark-mode {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .title,
+    .dark-mode h2,
+    .dark-mode h3,
+    .dark-mode h4 {
+      color: #3273dc !important;
+      /* Blue headings in dark mode */
+    }
+
+    .dark-mode .abstract-text {
+      background-color: rgba(50, 115, 220, 0.1);
+      color: #d0d0d0;
+    }
+
+    .dark-mode ul li,
+    .dark-mode ol li {
+      color: #d0d0d0;
+    }
+
+    /* Additional dark mode enhancements for specific elements */
+    .dark-mode h2.title.is-3:after {
+      background: linear-gradient(90deg, #4e8cff, #7a97ff);
+      /* Brighter gradient for section underlines */
+    }
+
+    .dark-mode .hero {
+      background: linear-gradient(135deg, rgba(50, 115, 220, 0.15), rgba(72, 95, 199, 0.15));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Fix for muted text labels in lists */
+    .dark-mode ul li strong,
+    .dark-mode ol li strong {
+      color: #5fa9ff;
+      /* Brighter blue */
+    }
+
+    .dark-mode ul li em,
+    .dark-mode ol li em,
+    .dark-mode ul li span,
+    .dark-mode ol li span {
+      color: #bbb;
+      /* Brighter color for emphasized and span text */
+    }
+
+    /* Improve visibility of section headers and labels */
+    .dark-mode .content h4 {
+      color: #5fa9ff !important;
+      /* Brighter blue for subheadings */
+    }
+
+    /* Lighter gray text that appears before the colon in lists */
+    .dark-mode li [class*="text-muted"],
+    .dark-mode li span:first-child {
+      color: #b8b8b8 !important;
+    }
+
+    /* Improve background colors */
+    .dark-mode {
+      background-color: #121212 !important;
+      background-image: none !important;
+    }
+
+    /* Ensure better contrast for module lists */
+    .dark-mode .feature-item h4 {
+      color: #5fa9ff !important;
+      margin-bottom: 1rem;
+    }
+
+    .dark-mode .feature-item ul li {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .feature-number {
+      color: rgba(79, 147, 255, 0.25) !important;
+    }
+
+    /* Ensure headings have proper border */
+    .dark-mode .title.is-3:after {
+      background: linear-gradient(90deg, #4e8cff, #7a97ff);
+    }
+
+    /* Improve bold highlighting in dark mode - comprehensive styling */
+    .dark-mode strong,
+    .dark-mode b {
+      color: #78b9ff !important;
+      /* Lighter, more vibrant blue */
+      font-weight: 600;
+      background-color: rgba(50, 115, 220, 0.15);
+      /* Subtle highlight background */
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    /* Special styling for bold text in specific contexts */
+    .dark-mode td strong,
+    .dark-mode th strong,
+    .dark-mode li strong,
+    .dark-mode h1 strong,
+    .dark-mode h2 strong,
+    .dark-mode h3 strong,
+    .dark-mode h4 strong,
+    .dark-mode h5 strong,
+    .dark-mode h6 strong,
+    .dark-mode .tldr-box strong {
+      color: #78b9ff !important;
+      background-color: rgba(50, 115, 220, 0.15);
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    /* The following specific styles can be kept, but they'll be overridden by the above 
+       if there's any conflict */
+    .dark-mode .abstract-text strong {
+      color: #78b9ff;
+      /* Lighter, more vibrant blue */
+      font-weight: 600;
+      background-color: rgba(50, 115, 220, 0.15);
+      /* Subtle highlight background */
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    .dark-mode p strong {
+      color: #78b9ff;
+      /* Lighter, more vibrant blue */
+      font-weight: 600;
+      background-color: rgba(50, 115, 220, 0.15);
+      /* Subtle highlight background */
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle Button -->
+  <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
+    <i id="theme-icon" class="fas fa-moon"></i>
+  </div>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">LitLLMs</h1>
+            <h2 class="subtitle is-3 subtitle-style">LLMs for Literature Review: Are we there yet?</h2>
+
+            <!-- TMLR Acceptance Badge -->
+            <div class="tmlr-badge">
+              <p class="is-size-5" style="font-weight: 600; margin: 0; color: #333;">
+                <span style="font-weight: 700;">TMLR 2025</span>
+              </p>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="#">Shubham Agarwal<sup>1,2,3*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Gaurav Sahu<sup>1,4*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Abhay Puri<sup>1*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Issam H. Laradji<sup>1,5</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Krishnamurthy DJ Dvijotham<sup>1</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Jason Stanley<sup>1</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Laurent Charlin<sup>2,3,6</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Christopher Pal<sup>1,2,7,6</sup></a>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>ServiceNow Research</span>
+              <span class="author-block"><sup>2</sup>Mila - Quebec AI Institute</span>
+              <span class="author-block"><sup>3</sup>HEC Montreal</span>
+              <span class="author-block"><sup>4</sup>University of Waterloo</span>
+              <span class="author-block"><sup>5</sup>University of British Columbia</span>
+              <span class="author-block"><sup>6</sup>Canada CIFAR AI Chair</span>
+              <span class="author-block"><sup>7</sup>Polytechnique Montreal</span>
+            </div>
+
+            <div class="is-size-6 equal-contrib">
+              <span class="author-block"><sup>*</sup>Equal Contribution</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://github.com/LitLLM/litllms-for-literature-review-tmlr" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2412.15249" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://www.servicenow.com/blogs/2025/litllm-scientific-literature-reviews" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <img src="static/images/snow_logo.png" alt="SNOW Logo" style="height: 16px; width: auto;">
+                    </span>
+                    <span>SNOW Research Blog</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://notebooklm.google.com/notebook/63b3ae13-a79d-4317-9fb9-80da0d6b3a0d/audio"
+                    target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-headphones"></i>
+                    </span>
+                    <span>NotebookLM Summary</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <button class="external-link button is-normal is-rounded is-dark" disabled>
+                    <span class="icon">
+                      <i class="fas fa-desktop"></i>
+                    </span>
+                    <span>Demo (Coming Soon)</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            <!-- TL;DR Box -->
+            <div class="tldr-box">
+              <div class="tldr-title">TL;DR:</div>
+              <p>LitLLM is a powerful AI toolkit that transforms how researchers write literature reviews, using
+                advanced Retrieval-Augmented Generation (RAG) to create accurate, well-structured related work sections
+                in seconds rather than days.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO SECTION FIRST -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-full-width">
+          <h2 class="title is-3">LitLLM in Action</h2>
+          <div class="video-container">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/9BqEpp6qLP8" title="LitLLM Demo Video"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <p class="has-text-centered" style="margin-top: 1rem;">
+            <a href="#litllm-interface" class="button is-link is-light">Go to LitLLM Interface</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Introduction Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <h2 class="title is-3" style="text-align: center;">Introduction</h2>
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              Writing comprehensive literature reviews is one of the most time-consuming aspects of academic research,
+              particularly in rapidly evolving fields like machine learning. As the volume of scientific publications
+              grows exponentially, researchers face increasing challenges in identifying, synthesizing, and
+              contextualizing relevant prior work. In this work we explore the potential of Large Language Models (LLMs)
+              to assist in this critical task, evaluating both their current capabilities and limitations.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRAMEWORK OVERVIEW SECTION (moved up) -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3" style="text-align: center;">Framework Overview</h2>
+      <!-- Image -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-six-fifths">
+          <figure>
+            <img src="static/images/litllm.png" alt="LitLLM Framework">
+            <figcaption>Figure 1: A schematic diagram of our framework, where: 1) Relevant prior work is
+              retrieved using keyword and
+              embedding-based search. 2) LLMs re-rank results to find the most relevant prior work. 3) Based on these
+              papers and
+              the user abstract or idea summary, an LLM generates a literature review, 4) optionally controlled by a
+              sentence plan.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <!-- Abstract -->
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              Literature reviews are an essential component of scientific research, but they remain time-intensive and
+              challenging to write. this work explores the
+              zero-shot abilities of recent Large Language Models (LLMs) for writing of literature
+              reviews based on an abstract. We decompose the task into two components: (1) Retrieving related works
+              given a query abstract and (2) Writing a literature review based on the retrieved results.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Background & Context Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <h2 class="title is-3" style="text-align: center;">Background and Context</h2>
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              This research sits at the intersection of scientific writing automation, retrieval-augmented generation
+              (RAG), and multi-document summarization. We approach the challenge by decomposing the literature review
+              task into two core components: <strong>Retrieval</strong> (finding relevant papers given a query abstract)
+              and <strong>Generation</strong> (creating a coherent literature review based on the retrieved papers).
+              This decomposition addresses a fundamental challenge in scientific writing: ensuring that LLM-generated
+              text is factually accurate, relevant, and properly contextualized. Our work contributes to several
+              important research areas including LLMs for scientific writing, RAG systems for grounding outputs in
+              external knowledge, and evaluation protocols for assessing LLM performance on literature review tasks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Approach and Key Findings Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <h2 class="title is-3" style="text-align: center;">Our Approach and Key Findings</h2>
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              We developed a novel interactive pipeline for literature review generation with two main components: a
+              Retrieval Module that finds relevant papers, and a Generation Module that synthesizes them into a coherent
+              review. Here we describe our approach and key results.
+            </p>
+
+            <!-- Retrieval Module -->
+            <h3 class="title is-4" style="margin-top: 2rem;">Retrieval Module</h3>
+            <p class="abstract-text">
+              Our retrieval process integrates multiple complementary techniques to maximize the discovery of relevant
+              papers. We begin with <strong>keyword extraction</strong>, using LLMs to identify meaningful keywords from
+              the query abstract. These keywords are then used for <strong>search methods</strong> that query external
+              knowledge bases like Google Scholar and Semantic Scholar. We enhance this with <strong>embedding-based
+                search</strong>, transforming abstracts into embeddings using SPECTER for similarity comparisons.
+              Finally, our <strong>re-ranking</strong> system implements a prompting-based mechanism <strong>with
+                attribution</strong> to prioritize the most relevant papers. We evaluated these approaches using
+              precision (the proportion of retrieved papers that are relevant) and normalized recall (the proportion of
+              relevant papers retrieved, normalized by the total number of relevant papers). Our results demonstrate
+              that combining keyword-based and embedding-based search significantly improves performance.
+            </p>
+
+            <figure>
+              <img src="static/images/fig1.png" alt="Normalized Recall Performance">
+              <figcaption>Figure 2: Normalized recall performance of different retrieval strategies showing that
+                combining keyword-based search, embedding-based search, and reranking with attribution (S2+SPECTER with
+                L3.1 Debate Rerank) achieves the highest performance.</figcaption>
+            </figure>
+
+            <!-- <figure>
+              <img src="static/images/fig2.png" alt="Precision Performance">
+              <figcaption>Figure 3: Precision performance across different retrieval methods, with SPECTER and L3.1 Debate Rerank showing strong results for smaller k values.</figcaption>
+            </figure> -->
+
+            <p>
+              The verification step in the retrieval process plays an important role in balancing precision and recall:
+            </p>
+
+            <figure>
+              <img src="static/images/fig3.png" alt="Verification Effect">
+              <figcaption>Figure 3: The effect of removing the referenced content verification step in the debate
+                ranking strategy. The plots show precision and normalized recall for two variants of the debate ranking
+                strategy, demonstrating that the verification step is crucial for success.</figcaption>
+            </figure>
+
+            <!-- Generation Module -->
+            <h3 class="title is-4" style="margin-top: 2rem;">Generation Module</h3>
+            <p class="abstract-text">
+              Once relevant papers are retrieved, our generation module synthesizes them into a coherent literature
+              review using several innovative approaches. We developed a <strong>planning-based approach</strong> that
+              follows a two-step process: first outlining a plan for the review structure, then executing steps in that
+              plan to create the final text. We tested various <strong>prompting strategies</strong> including vanilla
+              zero-shot prompting, plan-based prompting, sentence-by-sentence generation, and per-citation prompting to
+              understand the optimal generation technique. To evaluate quality, we employed multiple metrics:
+              <strong>ROUGE</strong> scores to measure text overlap with reference reviews, <strong>BERTScore</strong>
+              for semantic similarity assessment, <strong>Llama-3-Eval</strong> for LLM-based quality evaluation, and
+              <strong>human expert assessment</strong> to identify hallucinations and overall quality. Our findings show
+              that plan-based approaches consistently outperform vanilla prompting strategies, with GPT-4 achieving the
+              best results among all tested models.
+            </p>
+
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>ROUGE1 ↑</th>
+                  <th>ROUGE2 ↑</th>
+                  <th>ROUGEL↑</th>
+                  <th>BERTScore↑</th>
+                  <th>Llama-3-Eval↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CodeLlama 34B-Instruct</td>
+                  <td>22.608</td>
+                  <td>5.032</td>
+                  <td>12.553</td>
+                  <td>82.418</td>
+                  <td>66.898</td>
+                </tr>
+                <tr>
+                  <td>CodeLlama 34B-Instruct (Plan)</td>
+                  <td>27.369</td>
+                  <td>5.829</td>
+                  <td>14.705</td>
+                  <td>83.386</td>
+                  <td>67.362</td>
+                </tr>
+                <tr>
+                  <td>Llama 2-Chat 7B</td>
+                  <td>23.276</td>
+                  <td>5.104</td>
+                  <td>12.583</td>
+                  <td>82.841</td>
+                  <td>68.689</td>
+                </tr>
+                <tr>
+                  <td>Llama 2-Chat 13B</td>
+                  <td>23.998</td>
+                  <td>5.472</td>
+                  <td>12.923</td>
+                  <td>82.855</td>
+                  <td>69.237</td>
+                </tr>
+                <tr>
+                  <td>Llama 2-Chat 70B</td>
+                  <td>23.769</td>
+                  <td>5.619</td>
+                  <td>12.745</td>
+                  <td>82.943</td>
+                  <td>70.980</td>
+                </tr>
+                <tr>
+                  <td>GPT-3.5-turbo (0-shot)</td>
+                  <td>25.112</td>
+                  <td>6.118</td>
+                  <td>13.171</td>
+                  <td>83.352</td>
+                  <td>72.434</td>
+                </tr>
+                <tr>
+                  <td>GPT-4 (0-shot)</td>
+                  <td>29.289</td>
+                  <td>6.479</td>
+                  <td>15.048</td>
+                  <td>84.208</td>
+                  <td>72.951</td>
+                </tr>
+                <tr>
+                  <td>Llama 2-Chat 70B (Plan)</td>
+                  <td>30.919</td>
+                  <td>7.079</td>
+                  <td>15.991</td>
+                  <td>84.392</td>
+                  <td>71.354</td>
+                </tr>
+                <tr>
+                  <td>GPT-3.5-turbo (Plan)</td>
+                  <td>30.192</td>
+                  <td>7.028</td>
+                  <td>15.551</td>
+                  <td>84.203</td>
+                  <td>72.729</td>
+                </tr>
+                <tr>
+                  <td>GPT-4 (Plan)</td>
+                  <td>33.044</td>
+                  <td>7.352</td>
+                  <td>17.624</td>
+                  <td>85.151</td>
+                  <td>75.240</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="has-text-centered"><em>Table 1: Zero-shot results on the proposed RollingEval-Aug dataset.</em>
+            </p>
+
+            <!-- Human Evaluation Findings Section -->
+            <h3 class="title is-4" style="margin-top: 2rem;">Human Evaluation Findings</h3>
+            <p class="abstract-text">
+              The human evaluation component provides crucial insights into the practical utility of these LLM-generated
+              literature reviews. The figure below shows the instructions provided to experts during annotation:
+            </p>
+
+            <figure>
+              <img src="static/images/fig4.png" alt="Human Evaluation Interface">
+              <figcaption>Figure 4: The human evaluation interface used to compare model outputs and identify
+                hallucinations.</figcaption>
+            </figure>
+
+            <p>
+              The results from human evaluation strongly favor plan-based approaches as demonstrated in the figures
+              below:
+            </p>
+
+            <figure>
+              <img src="static/images/fig5.png" alt="Llama 2-Chat 70B Evaluation Results">
+              <figcaption>Figure 5: Human evaluation results for Llama 2-Chat 70B showing that plan-based generation
+                receives higher rankings and produces fewer hallucinations.</figcaption>
+            </figure>
+
+            <figure>
+              <img src="static/images/fig6.png" alt="GPT-4 Evaluation Results">
+              <figcaption>Figure 6: Human evaluation results for GPT-4 showing similar advantages for plan-based
+                generation.</figcaption>
+            </figure>
+
+            <p>
+              Our combined approach shows that plan-based generation with GPT-4 produces the highest quality literature
+              reviews, while our novel retrieval pipeline with debate-based re-ranking significantly improves the
+              discovery of relevant papers. This integration of optimized retrieval and structured generation enables
+              the creation of more accurate, comprehensive literature reviews.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Limitations and Future Work Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <h2 class="title is-3" style="text-align: center;">Limitations and Future Work</h2>
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              Despite the promising results, our research faces several key limitations. <strong>Retrieval
+                challenges</strong> are significant, as current methods still miss many relevant citations, with
+              substantial room for improvement in search strategies. <strong>Generation hallucinations</strong> remain
+              problematic; while our planning approach reduces them, LLMs still sometimes generate false citations or
+              misrepresent source materials. <strong>Evaluation complexity</strong> presents another obstacle, as
+              assessing literature review quality is inherently subjective and difficult to quantify with automated
+              metrics alone. Finally, <strong>domain specificity</strong> is a concern, as our approaches were primarily
+              tested on machine learning papers, and performance may vary significantly across different scientific
+              disciplines.
+            </p>
+            <p>
+              Our future research directions include improving embedding-based retrieval for better coverage of relevant
+              work, developing more sophisticated querying strategies that better capture semantic relationships between
+              papers, evaluating the system end-to-end with human researchers in the loop, and extending the approach to
+              other scientific disciplines beyond machine learning.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Conclusion Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <h2 class="title is-3" style="text-align: center;">Conclusion</h2>
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              The paper "LitLLMS, LLMs for Literature Review: Are we there yet?" provides a comprehensive analysis of
+              how LLMs can assist in literature review writing. The research demonstrates that while LLMs show
+              significant promise in this domain, they are not yet ready to fully automate the process. The most
+              effective approach combines <strong>Hybrid retrieval</strong> methods integrating keyword and
+              embedding-based search, <strong>Attribution-based re-ranking</strong> to prioritize relevant papers, and
+              <strong>Plan-based generation</strong> to create structured, coherent literature reviews with fewer
+              hallucinations.
+            </p>
+            <p>
+              The ultimate vision is not to replace human researchers but to create interactive systems where LLMs
+              assist in the most time-consuming aspects of literature review, allowing researchers to focus on
+              higher-level synthesis and insight generation. This work takes an important step toward that vision by
+              identifying both the current capabilities and limitations of LLMs for literature review tasks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERFACE SECTION -->
+  <section class="section" id="litllm-interface">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-six-fifths">
+        <h2 class="title is-3">LitLLM Interface</h2>
+      </div>
+    </div>
+
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full-width">
+          <div class="content has-text-justified">
+            <figure>
+              <img src="static/images/react_demo.png" alt="LitLLM Interface">
+              <figcaption>Figure 5: LitLLM interface. Our system works on the Retrieval Augmented Generation
+                (RAG) principle to generate the literature review grounded in retrieved relevant papers. The user needs
+                to
+                provide the abstract in the textbox (in purple) and press send to get the generated related work (in
+                red).
+                First, the abstract is summarized into keywords, which are used to query a search engine. Retrieved
+                results
+                are re-ranked (in blue) using an LLM, which is then used as context to generate the related work. Users
+                could
+                also provide a sentence plan (in green) according to their preference to generate a concise, readily
+                usable
+                literature review.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column">
+          <h2 class="title is-3">The LitLLM Team</h2>
+          <p class="abstract-text">
+            LitLLM is developed by researchers at ServiceNow Research and Mila - Quebec AI Institute who are passionate
+            about improving scientific workflows through advanced AI techniques.
+          </p>
+
+          <div class="citation-section">
+            <p class="citation-heading">
+              If you find LitLLM useful in your research, please cite both of our papers:
+            </p>
+
+            <!-- Citation Boxes -->
+            <div class="citation-boxes-container">
+              <div class="citation-box">
+                <pre>@article{agarwal2024llms,
+  title={LitLLMs, LLMs for Literature Review: Are we there yet?},
+  author={Agarwal*, Shubham and Sahu*, Gaurav and Puri*, Abhay and Laradji, Issam H and Dvijotham, Krishnamurthy DJ and Stanley, Jason and Charlin, Laurent and Pal, Christopher},
+  journal={arXiv preprint arXiv:2412.15249},
+  year={2024}
+}</pre>
+                <button class="copy-button" onclick="copyToClipboard(this)">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+
+              <div class="citation-box">
+                <pre>@article{agarwal2024litllm,
+  title={Litllm: A toolkit for scientific literature review},
+  author={Agarwal*, Shubham and Sahu*, Gaurav and Puri*, Abhay and Laradji, Issam H and Dvijotham, Krishnamurthy DJ and Stanley, Jason and Charlin, Laurent and Pal, Christopher},
+  journal={arXiv preprint arXiv:2402.01788},
+  year={2024}
+}</pre>
+                <button class="copy-button" onclick="copyToClipboard(this)">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+
+            <p class="footer-note">
+              * Equal contribution
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer section commented out for now
+  <footer>
+    <div class="container is-max-desktop">
+      <div class="columns">
+        <div class="column has-text-centered">
+          <p class="is-size-5" style="margin-bottom: 1rem;">
+            <strong style="background: linear-gradient(90deg, #3273dc, #485fc7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LitLLM</strong>
+          </p>
+          <p>© 2024 LitLLM Team. All rights reserved.</p>
+          <p class="is-size-7" style="margin-top: 1rem;">
+            For questions about LitLLM, please contact <a href="mailto:contact@litllm.org">the authors</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  -->
+
+  <!-- Script for citation copy buttons -->
+  <script src="./static/js/copy-citation.js"></script>
+
+  <!-- Citation copy functionality -->
+  <script>
+    function copyToClipboard(button) {
+      // Get the citation text from pre element inside citation box
+      const citationBox = button.parentNode;
+      const preElement = citationBox.querySelector('pre');
+      const text = preElement.textContent.trim();
+
+      // Use the Clipboard API
+      navigator.clipboard.writeText(text).then(() => {
+        // Visual feedback
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('copied');
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+          button.innerHTML = '<i class="fas fa-copy"></i>';
+          button.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  </script>
+</body>
+
+</html>
