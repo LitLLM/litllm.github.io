@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="LitLLMs, LLMs for Literature Review: Are We There Yet?">
+  <meta name="keywords" content="Literature Review, LLMs, Research">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LitLLMs: LLMs for Literature Review</title>
+
+  <!-- Dark mode fix script - must be first -->
+  <script src="./static/js/dark-mode-fix.js"></script>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/dark-mode.css">
+  <link rel="stylesheet" href="./static/css/theme-reset.css">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/954/954591.png">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/fira_code.css">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/4.16.0/gradio.js"></script>
+  <script src="./static/js/theme-toggle.js"></script>
+
+  <style>
+    body {
+      background-color: #f9f9f9;
+      background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
+      color: #333;
+      font-family: 'Google Sans', 'Noto Sans', sans-serif;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(50, 115, 220, 0.05), rgba(72, 95, 199, 0.05));
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 2rem 1.5rem;
+    }
+
+    .section {
+      padding: 2rem 1.5rem;
+      background-color: white;
+      margin: 1rem auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .expandable-card .card-text-container {
+      max-height: 200px;
+      overflow-y: hidden;
+      position: relative;
+    }
+
+    .expandable-card.expanded .card-text-container {
+      max-height: none;
+    }
+
+    .expand-btn {
+      position: relative;
+      display: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #510c75;
+      border-color: transparent;
+    }
+
+    .expand-btn:hover {
+      background-color: rgba(200, 200, 200, 0.8);
+      text-decoration: none;
+      border-color: transparent;
+      color: #510c75;
+    }
+
+    .expand-btn:focus {
+      outline: none;
+      text-decoration: none;
+    }
+
+    .expandable-card:not(.expanded) .card-text-container:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
+    }
+
+    .expandable-card:not(.expanded) .expand-btn {
+      margin-top: -40px;
+    }
+
+    .card-body {
+      padding-bottom: 5px;
+    }
+
+    .vertical-flex-layout {
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .figure-img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .adjustable-font-size {
+      font-size: calc(0.5rem + 2vw);
+    }
+
+    .chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    #gradio pre {
+      background-color: transparent;
+    }
+
+    .container.is-max-desktop {
+      padding: 0 1.5rem;
+    }
+
+    .publication-title {
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #3273dc, #485fc7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+    }
+
+    .title.is-3 {
+      position: relative;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .title.is-3:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, #3273dc, #485fc7);
+      border-radius: 3px;
+    }
+
+    .author-block a {
+      color: #4a4a4a;
+      text-decoration: none;
+      transition: color 0.3s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .author-block a:hover {
+      color: #3273dc;
+      transform: translateY(-2px);
+    }
+
+    .subtitle-style {
+      font-style: italic;
+      color: #555;
+      transition: color 0.3s ease;
+    }
+
+    .subtitle-style:hover {
+      color: #3273dc;
+    }
+
+    .equal-contrib {
+      font-size: 0.9em;
+      margin-top: 8px;
+      color: #666;
+    }
+
+    .tldr-box {
+      background-color: #f9f9f9;
+      border-left: 5px solid #3273dc;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tldr-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .tldr-title {
+      font-weight: bold;
+      color: #3273dc;
+      margin-bottom: 8px;
+    }
+
+    .citation-box {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .citation-box:hover {
+      background-color: #eaeaea;
+      transform: translateY(-3px);
+    }
+
+    .coming-soon {
+      background-color: #FFEDB9;
+      color: #856404;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .coming-soon:hover {
+      transform: scale(1.02);
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    figure {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    figure:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    figcaption {
+      padding: 1rem 0.5rem;
+      font-size: 0.9rem;
+      color: #666;
+      border-top: 1px solid #eee;
+      margin-top: 1rem;
+    }
+
+    .external-link.button {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .external-link.button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .publication-links {
+      margin-top: 1.5rem;
+    }
+
+    .feature-item {
+      background-color: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #3273dc;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-item:nth-child(even) {
+      border-left: 4px solid #485fc7;
+    }
+
+    .feature-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: rgba(50, 115, 220, 0.2);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-item:nth-child(even) .feature-number {
+      color: rgba(72, 95, 199, 0.2);
+    }
+
+    .abstract-text {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #444;
+      padding: 1.5rem;
+      background-color: rgba(50, 115, 220, 0.03);
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .tmlr-badge {
+      display: inline-block;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, rgba(50, 115, 220, 0.1), rgba(72, 95, 199, 0.1));
+      border-left: 4px solid #3273dc;
+      border-right: 4px solid #485fc7;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tmlr-badge:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle Button -->
+  <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
+    <i id="theme-icon" class="fas fa-moon"></i>
+  </div>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">LitLLMs</h1>
+            <h2 class="subtitle is-3 subtitle-style">LLMs for Literature Review: Are we there yet?</h2>
+
+            <!-- TMLR Acceptance Badge -->
+            <div class="tmlr-badge">
+              <p class="is-size-5" style="font-weight: 600; margin: 0; color: #333;">
+                <span style="font-weight: 700;">Accepted in TMLR</span> (Transactions on Machine Learning Research)
+              </p>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="#">Shubham Agarwal<sup>1,2,3*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Gaurav Sahu<sup>1,4*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Abhay Puri<sup>1*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Issam H. Laradji<sup>1,5</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Krishnamurthy DJ Dvijotham<sup>1</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Jason Stanley<sup>1</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Laurent Charlin<sup>2,3,6</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="#">Christopher Pal<sup>1,2,7,6</sup></a>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>ServiceNow Research</span>
+              <span class="author-block"><sup>2</sup>Mila - Quebec AI Institute</span>
+              <span class="author-block"><sup>3</sup>HEC Montreal</span>
+              <span class="author-block"><sup>4</sup>University of Waterloo</span>
+              <span class="author-block"><sup>5</sup>University of British Columbia</span>
+              <span class="author-block"><sup>6</sup>Canada CIFAR AI Chair</span>
+              <span class="author-block"><sup>7</sup>Polytechnique Montreal</span>
+            </div>
+
+            <div class="is-size-6 equal-contrib">
+              <span class="author-block"><sup>*</sup>Equal Contribution</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://github.com/LitLLM/litllms-for-literature-review-tmlr" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2412.15249" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/LitLLM/litllm-react" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-desktop"></i>
+                    </span>
+                    <span>Demo</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+
+            <!-- TL;DR Box -->
+            <div class="tldr-box">
+              <div class="tldr-title">TL;DR:</div>
+              <p>LitLLM is a powerful AI toolkit that transforms how researchers write literature reviews, using
+                advanced Retrieval-Augmented Generation (RAG) to create accurate, well-structured related work sections
+                in seconds rather than days.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO SECTION FIRST -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-full-width">
+          <h2 class="title is-3">LitLLM in Action</h2>
+          <div class="video-container">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/C2TQvkTpBZg" title="LitLLM Demo Video"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE SECTION SECOND -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3" style="text-align: center;">Framework Overview</h2>
+      <!-- Image -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-six-fifths">
+          <figure>
+            <img src="static/images/litllm.png" alt="LitLLM Framework">
+            <figcaption>Figure 1: A schematic diagram of our framework, where: 1) Relevant prior work is
+              retrieved using keyword and
+              embedding-based search. 2) LLMs re-rank results to find the most relevant prior work. 3) Based on these
+              papers and
+              the user abstract or idea summary, an LLM generates a literature review, 4) optionally controlled by a
+              sentence plan.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <!-- Abstract -->
+      <div class="columns is-centered">
+        <div class="column is-six-fifths">
+          <div class="content has-text-justified">
+            <p class="abstract-text">
+              Literature reviews are an essential component of scientific research, but they remain time-intensive and
+              challenging to write, especially due to the recent influx of research papers. This paper explores the
+              zero-shot abilities of recent Large Language Models (LLMs) in assisting with the writing of literature
+              reviews based on an abstract. We decompose the task into two components: (1) Retrieving related works
+              given a query abstract and (2) Writing a literature review based on the retrieved results.
+            </p>
+
+            <div class="key-features">
+              <div class="feature-item">
+                <div class="feature-number">01</div>
+                <div class="feature-content">
+                  <h4>Novel Search Strategy</h4>
+                  <p>We introduce a two-step search strategy that first uses an LLM to extract meaningful keywords from
+                    the abstract of a paper and then retrieves potentially relevant papers by querying an external
+                    knowledge base.</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-number">02</div>
+                <div class="feature-content">
+                  <h4>Prompting-Based Re-Ranking</h4>
+                  <p>We study a prompting-based re-ranking mechanism with attribution that doubles the normalized recall
+                    compared to naive search methods while providing insights into the LLM's decision-making process.
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-number">03</div>
+                <div class="feature-content">
+                  <h4>Two-Step Generation Approach</h4>
+                  <p>In the generation phase, we propose a two-step approach that first outlines a plan for the review
+                    and then executes steps in the plan to generate the actual review.</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-number">04</div>
+                <div class="feature-content">
+                  <h4>Improved Performance</h4>
+                  <p>Our approach combines keyword-based and document-embedding-based search to improve precision and
+                    recall during retrieval by 10% and 30%, while minimizing hallucinated references by 18-26% compared
+                    to existing methods.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERFACE SECTION THIRD -->
+  <section class="section">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-six-fifths">
+        <h2 class="title is-3">LitLLM Interface</h2>
+      </div>
+    </div>
+
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full-width">
+          <div class="content has-text-justified">
+            <figure>
+              <img src="static/images/react_demo.png" alt="LitLLM Interface">
+              <figcaption>Figure 2: LitLLM interface. Our system works on the Retrieval Augmented Generation
+                (RAG) principle to generate the literature review grounded in retrieved relevant papers. The user needs
+                to
+                provide the abstract in the textbox (in purple) and press send to get the generated related work (in
+                red).
+                First, the abstract is summarized into keywords, which are used to query a search engine. Retrieved
+                results
+                are re-ranked (in blue) using an LLM, which is then used as context to generate the related work. Users
+                could
+                also provide a sentence plan (in green) according to their preference to generate a concise, readily
+                usable
+                literature review.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-three-quarters">
+          <h2 class="title is-3" style="text-align: center;">Citations</h2>
+          <p class="has-text-centered">If you find this work useful, please cite:</p>
+          <div class="citation-box">
+            @article{agarwal2024llms, <br>
+            &nbsp;&nbsp;title={LitLLMs, LLMs for Literature Review: Are we there yet?}, <br>
+            &nbsp;&nbsp;author={Agarwal, Shubham and Sahu, Gaurav and Puri, Abhay and Laradji, Issam H and Dvijotham,
+            Krishnamurthy DJ and Stanley, Jason and Charlin, Laurent and Pal, Christopher}, <br>
+            &nbsp;&nbsp;journal={arXiv preprint arXiv:2412.15249}, <br>
+            &nbsp;&nbsp;year={2024} <br>
+            }
+          </div>
+
+          <div class="citation-box">
+            @article{agarwal2024litllm, <br>
+            &nbsp;&nbsp;title={Litllm: A toolkit for scientific literature review}, <br>
+            &nbsp;&nbsp;author={Agarwal, Shubham and Sahu, Gaurav and Puri, Abhay and Laradji, Issam H and Dvijotham,
+            Krishnamurthy DJ and Stanley, Jason and Charlin, Laurent and Pal, Christopher}, <br>
+            &nbsp;&nbsp;journal={arXiv preprint arXiv:2402.01788}, <br>
+            &nbsp;&nbsp;year={2024} <br>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <div class="coming-soon">
+          <h4 class="subtitle has-text-centered">
+            <i class="fas fa-hourglass-half"></i> Advanced features and interactive demos coming soon!
+          </h4>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer section commented out for now
+  <footer>
+    <div class="container is-max-desktop">
+      <div class="columns">
+        <div class="column has-text-centered">
+          <p class="is-size-5" style="margin-bottom: 1rem;">
+            <strong style="background: linear-gradient(90deg, #3273dc, #485fc7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LitLLM</strong>
+          </p>
+          <p>© 2024 LitLLM Team. All rights reserved.</p>
+          <p class="is-size-7" style="margin-top: 1rem;">
+            For questions about LitLLM, please contact <a href="mailto:contact@litllm.org">the authors</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  -->
+
+  <!-- Script for citation copy buttons -->
+  <script src="./static/js/copy-citation.js"></script>
+
+</body>
+
+</html>

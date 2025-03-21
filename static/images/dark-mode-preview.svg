@@ -1,0 +1,35 @@
+<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light Mode Background -->
+  <rect x="10" y="10" width="180" height="180" rx="5" fill="#f9f9f9" stroke="#cccccc" stroke-width="1"/>
+  
+  <!-- Dark Mode Background -->
+  <rect x="210" y="10" width="180" height="180" rx="5" fill="#121212" stroke="#333333" stroke-width="1"/>
+  
+  <!-- Light Mode Content -->
+  <rect x="30" y="50" width="140" height="20" rx="3" fill="#ffffff" stroke="#eeeeee" stroke-width="1"/>
+  <rect x="30" y="80" width="140" height="20" rx="3" fill="#ffffff" stroke="#eeeeee" stroke-width="1"/>
+  <rect x="30" y="110" width="140" height="20" rx="3" fill="#ffffff" stroke="#eeeeee" stroke-width="1"/>
+  <rect x="30" y="140" width="70" height="20" rx="3" fill="#3273dc" stroke="none"/>
+  
+  <!-- Dark Mode Content -->
+  <rect x="230" y="50" width="140" height="20" rx="3" fill="#1e1e1e" stroke="#444444" stroke-width="1"/>
+  <rect x="230" y="80" width="140" height="20" rx="3" fill="#1e1e1e" stroke="#444444" stroke-width="1"/>
+  <rect x="230" y="110" width="140" height="20" rx="3" fill="#1e1e1e" stroke="#444444" stroke-width="1"/>
+  <rect x="230" y="140" width="70" height="20" rx="3" fill="#5e9cf9" stroke="none"/>
+  
+  <!-- Toggle Buttons -->
+  <circle cx="150" cy="30" r="15" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <path d="M150 25 L150 35 M145 30 L155 30" stroke="#333333" stroke-width="2"/>
+  
+  <circle cx="350" cy="30" r="15" fill="#1e1e1e" stroke="#444444" stroke-width="1"/>
+  <circle cx="350" cy="30" r="7" fill="none" stroke="#e0e0e0" stroke-width="2"/>
+  <path d="M350 18 L350 16 M342 22 L340 20 M342 38 L340 40 M350 42 L350 44 M358 38 L360 40 M358 22 L360 20" stroke="#e0e0e0" stroke-width="2"/>
+  
+  <!-- Labels -->
+  <text x="100" y="180" font-family="Arial" font-size="12" text-anchor="middle" fill="#333333">Light Mode</text>
+  <text x="300" y="180" font-family="Arial" font-size="12" text-anchor="middle" fill="#e0e0e0">Dark Mode</text>
+  
+  <!-- Arrow -->
+  <path d="M195 100 L215 100" stroke="#666666" stroke-width="2"/>
+  <path d="M210 95 L215 100 L210 105" fill="none" stroke="#666666" stroke-width="2"/>
+</svg> 
